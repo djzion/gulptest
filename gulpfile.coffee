@@ -22,6 +22,7 @@ sources =
   html: 'index.html'
   coffee: 'src/**/*.coffee'
   js: 'src/**/*.js'
+  spec: 'spec/**/*.coffee'
   templates: 'src/**/*.jade'
   bower: 'bower_components/*/index.js'
 
@@ -30,6 +31,7 @@ destinations =
   css: 'dist/css'
   html: 'dist/'
   js: 'dist/js'
+  spec: 'dist/js'
   templates: 'dist/js'
 
 modulePath = (path) ->
@@ -43,9 +45,13 @@ gulp.task 'connect', connect.server(
   root: ['dist'] # this is the directory the server will run
   port: 1337
   livereload: true
-  open:
-    browser: 'chromium-browser' # change that to the browser you're using
 )
+
+gulp.task 'testServer', connect.server
+    root: ['test', 'dist']
+    port: 9998
+    livereload: false
+
 
 gulp.task 'style', ->
   gulp.src(sources.sass)
@@ -96,7 +102,13 @@ gulp.task 'clean', ->
   gulp.src(['dist/'], {read: false}).pipe(clean())
 
 gulp.task 'build', ->
-  runSequence 'clean', ['style', 'src', 'html', 'templates', 'bower-files']
+  runSequence 'clean', ['style', 'src', 'html', 'templates', 'bower-files', 'specs']
+
+gulp.task 'specs', ->
+  gulp.src(sources.spec)
+  .pipe(coffee().on('error', gutil.log))
+  .pipe(concat('spec.js'))
+  .pipe(gulp.dest(destinations.spec))
 
 gulp.task 'bower-files', ->
   bower()
@@ -106,5 +118,11 @@ gulp.task 'bower-files', ->
 gulp.task 'default', [
   'build'
   'connect'
+  'watch'
+]
+
+gulp.task 'test', [
+  'build'
+  'testServer'
   'watch'
 ]

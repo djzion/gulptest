@@ -9,15 +9,7 @@
   "dependencies": {
     "jquery": "2.1",
     "backbone": "1.1.2",
-    "d3": "3.4.6"
-  },
-  "overrides": {
-    "BOWER-PACKAGE": {
-        "main": {
-            "development": "file.js",
-            "production": "file.min.js"
-        },
-        "debugging": true
-    }
+    "d3": "3.4.6",
+    "jasmine": "2.0.0"
   }
 }

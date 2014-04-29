@@ -22,14 +22,20 @@ module.exports = class Circle extends Backbone.Model
       false
 
 
-    a = (Math.pow(r0, 2) - Math.pow(r1, 2) + Math.pow(d, 2) ) / (d * 2)
-    #h2 = r02 - a2
-    h = Math.sqrt(Math.pow(r0, 2) - Math.pow(a, 2))
-
+    a = (Math.pow(r0, 2) - Math.pow(r1, 2) + Math.pow(d, 2)) / (d * 2)
     p2 =
-      x: (p0.x + (a * ( p1.x - p0.x ))) / d
-      y: (p0.y + (a * ( p1.y - p0.y ))) / d
+      x: p0.x + ((p1.x - p0.x ) * a/d)
+      y: p0.y + ((p1.y - p0.y ) * a/d)
+    h = Math.sqrt(Math.pow(r0, 2) - Math.pow(a, 2))
+    #Now determine the offsets of the intersection points from point 2.
+    rx = (0 - (p1.y - p0.y)) * (h/d)
+    ry = (p1.x - p0.x ) * (h/d)
 
-    int =
-      x: (p2.x - (h * ( p1.x - p0.x ))) / d
-      y: (p2.y + (h * ( p1.y - p0.y ))) / d
+
+    int = [{
+      x: p2.x - rx
+      y: p2.y - ry
+    }, {
+      x: p2.x + rx
+      y: p2.y + ry
+    }]

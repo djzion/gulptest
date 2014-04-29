@@ -85,7 +85,7 @@ module.exports = Circle = (function(_super) {
   };
 
   Circle.prototype.intersection = function(other) {
-    var a, d, h, int, p0, p1, p2, r0, r1;
+    var a, d, h, int, p0, p1, p2, r0, r1, rx, ry;
     d = this.distance(other);
     r0 = this.get('attrs').r;
     p0 = this.get('pos');
@@ -104,15 +104,22 @@ module.exports = Circle = (function(_super) {
       false;
     }
     a = (Math.pow(r0, 2) - Math.pow(r1, 2) + Math.pow(d, 2)) / (d * 2);
-    h = Math.sqrt(Math.pow(r0, 2) - Math.pow(a, 2));
     p2 = {
-      x: (p0.x + (a * (p1.x - p0.x))) / d,
-      y: (p0.y + (a * (p1.y - p0.y))) / d
+      x: p0.x + ((p1.x - p0.x) * a / d),
+      y: p0.y + ((p1.y - p0.y) * a / d)
     };
-    return int = {
-      x: (p2.x - (h * (p1.x - p0.x))) / d,
-      y: (p2.y + (h * (p1.y - p0.y))) / d
-    };
+    h = Math.sqrt(Math.pow(r0, 2) - Math.pow(a, 2));
+    rx = (0 - (p1.y - p0.y)) * (h / d);
+    ry = (p1.x - p0.x) * (h / d);
+    return int = [
+      {
+        x: p2.x - rx,
+        y: p2.y - ry
+      }, {
+        x: p2.x + rx,
+        y: p2.y + ry
+      }
+    ];
   };
 
   return Circle;
