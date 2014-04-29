@@ -1,0 +1,39 @@
+html, body {
+  font-family: "Helvetica", sans-serif;
+  padding: 0;
+  margin: 0; }
+
+div {
+  box-sizing: border-box; }
+
+#page {
+  position: absolute;
+  height: 100%;
+  top: 0;
+  left: 0;
+  width: 100%; }
+  #page g {
+    width: 100%;
+    height: 100%; }
+  #page circle {
+    fill: transparent;
+    stroke: black;
+    stroke-width: 1px;
+    text-fill: black;
+    text-font-size: 20px;
+    text-text-anchor: middle; }
+    #page circle.center, #page circle.outer {
+      stroke: red; }
+    #page circle.level-1 {
+      stroke: #333333; }
+    #page circle.level-2 {
+      stroke: #666666; }
+    #page circle.level-3 {
+      stroke: #999999; }
+    #page circle.level-4 {
+      stroke: #cccccc; }
+    #page circle.level-5 {
+      stroke: #006699; }
+  #page line.axis {
+    stroke: black;
+    stroke-width: 2px; }

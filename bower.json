@@ -1,0 +1,23 @@
+{
+  "name": "my-project",
+  "version": "1.0.0",
+  "main": "path/to/main.css",
+  "ignore": [
+    ".jshintrc",
+    "**/*.txt"
+  ],
+  "dependencies": {
+    "jquery": "2.1",
+    "backbone": "1.1.2",
+    "d3": "3.4.6"
+  },
+  "overrides": {
+    "BOWER-PACKAGE": {
+        "main": {
+            "development": "file.js",
+            "production": "file.min.js"
+        },
+        "debugging": true
+    }
+  }
+}
