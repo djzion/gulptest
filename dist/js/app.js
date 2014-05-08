@@ -87,9 +87,13 @@ module.exports = Circle = (function(_super) {
     }
   };
 
+  Circle.prototype.distance = function(other) {
+    return this.pos.distance(other.pos);
+  };
+
   Circle.prototype.intersection = function(other) {
     var a, d, h, int, p0, p1, p2, r0, r1, rx, ry;
-    d = this.pos.distance(other.pos);
+    d = this.distance(other);
     r0 = this.get('attrs').r;
     p0 = this.get('pos');
     r1 = other.get('attrs').r;

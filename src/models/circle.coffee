@@ -7,8 +7,11 @@ module.exports = class Circle extends Backbone.Model
     if _.isNaN(@pos.x) or _.isNaN(@pos.y)
       throw Error 'invalid pos'
 
+  distance: (other) ->
+    @pos.distance(other.pos)
+
   intersection: (other) ->
-    d = @pos.distance(other.pos)
+    d = @distance(other)
     r0 = @get('attrs').r
     p0 = @get('pos')
     r1 = other.get('attrs').r
