@@ -1,11 +1,12 @@
+Point = require 'models/point'
+
 module.exports = class Circle extends Backbone.Model
 
-  distance: (other) ->
-    d = Math.pow(other.get('pos').x - @get('pos').x, 2) + Math.pow(other.get('pos').y - @get('pos').y, 2)
-    Math.sqrt(d)
+  initialize: ->
+    @pos = new Point @get('pos')
 
   intersection: (other) ->
-    d = @distance(other)
+    d = @pos.distance(other.pos)
     r0 = @get('attrs').r
     p0 = @get('pos')
     r1 = other.get('attrs').r
@@ -21,7 +22,6 @@ module.exports = class Circle extends Backbone.Model
       console.log 'concident'
       false
 
-
     a = (Math.pow(r0, 2) - Math.pow(r1, 2) + Math.pow(d, 2)) / (d * 2)
     p2 =
       x: p0.x + ((p1.x - p0.x ) * a/d)
@@ -32,10 +32,15 @@ module.exports = class Circle extends Backbone.Model
     ry = (p1.x - p0.x ) * (h/d)
 
 
-    int = [{
+    int = [new Point({
       x: p2.x - rx
       y: p2.y - ry
-    }, {
+    }), new Point({
       x: p2.x + rx
       y: p2.y + ry
-    }]
+    })]
+
+    if int[1].distance(new Point(x: 0, y: 0)) >= int[0].distance(new Point(x: 0, y: 0))
+      console.log 'reversed'
+      int = _(int).reverse()
+    int

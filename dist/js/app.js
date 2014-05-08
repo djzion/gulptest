@@ -67,9 +67,11 @@ Backbone.$ = jQuery;
 });
 
 require.register("models/circle", function(exports, require, module){
-  var Circle,
+  var Circle, Point,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+Point = require('models/point');
 
 module.exports = Circle = (function(_super) {
   __extends(Circle, _super);
@@ -78,15 +80,13 @@ module.exports = Circle = (function(_super) {
     return Circle.__super__.constructor.apply(this, arguments);
   }
 
-  Circle.prototype.distance = function(other) {
-    var d;
-    d = Math.pow(other.get('pos').x - this.get('pos').x, 2) + Math.pow(other.get('pos').y - this.get('pos').y, 2);
-    return Math.sqrt(d);
+  Circle.prototype.initialize = function() {
+    return this.pos = new Point(this.get('pos'));
   };
 
   Circle.prototype.intersection = function(other) {
     var a, d, h, int, p0, p1, p2, r0, r1, rx, ry;
-    d = this.distance(other);
+    d = this.pos.distance(other.pos);
     r0 = this.get('attrs').r;
     p0 = this.get('pos');
     r1 = other.get('attrs').r;
@@ -111,15 +111,26 @@ module.exports = Circle = (function(_super) {
     h = Math.sqrt(Math.pow(r0, 2) - Math.pow(a, 2));
     rx = (0 - (p1.y - p0.y)) * (h / d);
     ry = (p1.x - p0.x) * (h / d);
-    return int = [
-      {
+    int = [
+      new Point({
         x: p2.x - rx,
         y: p2.y - ry
-      }, {
+      }), new Point({
         x: p2.x + rx,
         y: p2.y + ry
-      }
+      })
     ];
+    if (int[1].distance(new Point({
+      x: 0,
+      y: 0
+    })) >= int[0].distance(new Point({
+      x: 0,
+      y: 0
+    }))) {
+      console.log('reversed');
+      int = _(int).reverse();
+    }
+    return int;
   };
 
   return Circle;
@@ -148,6 +159,34 @@ module.exports = Circles = (function(_super) {
   return Circles;
 
 })(Backbone.Collection);
+
+  
+});
+
+require.register("models/point", function(exports, require, module){
+  var Point;
+
+module.exports = Point = (function() {
+  function Point(_arg) {
+    this.x = _arg.x, this.y = _arg.y;
+  }
+
+  Point.prototype.distance = function(other) {
+    var d;
+    d = Math.pow(other.x - this.x, 2) + Math.pow(other.y - this.y, 2);
+    return Math.sqrt(d);
+  };
+
+  Point.prototype.toString = function() {
+    return {
+      x: this.x,
+      y: this.y
+    };
+  };
+
+  return Point;
+
+})();
 
   
 });
@@ -268,14 +307,16 @@ module.exports = Seed = (function(_super) {
         }, null, 1);
       };
     })(this), 6);
-    this.iterRadians((function(_this) {
-      return function(i, degrees, rads) {
-        _this.pos = getPos(rads, 2);
-        return _this.createCircle({
-          "class": 'level-2'
-        }, null, 2);
-      };
-    })(this), 6);
+
+    /*
+    @iterRadians (i, degrees, rads) =>
+      @pos = getPos(rads, 2)
+      @createCircle(class: 'level-2', null, 2)
+    , 6
+     */
+    this.drawGen2(1, 2);
+    this.drawGen2(2, 2);
+    this.drawGen2(2, 3);
     return;
     if (this.model.get('mode') === 'seed') {
       this.pos = _(this.center).clone();
@@ -345,11 +386,35 @@ module.exports = Seed = (function(_super) {
     return _results;
   };
 
+  Seed.prototype.drawGen2 = function(childGenId, genId) {
+    var c2, circle, gen, i, int, newCircle, _i, _ref, _results;
+    console.log('Gen', genId);
+    gen = this.circles.where({
+      gen: childGenId
+    });
+    _results = [];
+    for (i = _i = 0, _ref = gen.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+      circle = gen[i];
+      c2 = this.circles.get(gen[0].id + (gen.length + 1 + i) % gen.length);
+      int = circle.intersection(c2);
+      console.log(circle.id, c2.id, int);
+      if (int) {
+        _results.push(newCircle = this.createCircle({
+          "class": 'level-3'
+        }, int[0], genId));
+      } else {
+        _results.push(console.log('no int'));
+      }
+    }
+    return _results;
+  };
+
   Seed.prototype.createCircle = function(attrs, pos, gen) {
     var circle, _attrs;
     if (pos == null) {
       pos = this.pos;
     }
+    console.log('circle', this.i);
     _attrs = {
       r: this.r,
       "class": 'circle',

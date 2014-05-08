@@ -32,11 +32,15 @@ module.exports = class Seed extends Backbone.View
       @pos = getPos(rads, 1)
       @createCircle(class: 'level-1', null, 1)
     , 6
-
+    ###
     @iterRadians (i, degrees, rads) =>
       @pos = getPos(rads, 2)
       @createCircle(class: 'level-2', null, 2)
     , 6
+    ###
+    @drawGen2 1, 2
+    @drawGen2 2, 2
+    @drawGen2 2, 3
 
     #@iterRadians (i, degrees, rads) =>
     #  @pos = getPos(rads, 1.73)
@@ -85,7 +89,21 @@ module.exports = class Seed extends Backbone.View
     for i in [0..circles.length-1]
       @drawGeneration(gen+1, circle, (i+dir)%6)
 
+  drawGen2: (childGenId, genId) ->
+    console.log 'Gen', genId
+    gen = @circles.where({gen: childGenId})
+    for i in [0..gen.length-1]
+      circle = gen[i]
+      c2 = @circles.get(gen[0].id + (gen.length + 1 + i) % gen.length)
+      int = circle.intersection(c2)
+      console.log circle.id, c2.id, int
+      if int
+        newCircle = @createCircle class: 'level-3', int[0], genId
+      else
+        console.log 'no int'
+
   createCircle: (attrs, pos=@pos, gen) ->
+    console.log 'circle', @i
     _attrs =
       r: @r
       class: 'circle'
