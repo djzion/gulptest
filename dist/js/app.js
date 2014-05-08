@@ -81,7 +81,10 @@ module.exports = Circle = (function(_super) {
   }
 
   Circle.prototype.initialize = function() {
-    return this.pos = new Point(this.get('pos'));
+    this.pos = new Point(this.get('pos'));
+    if (_.isNaN(this.pos.x) || _.isNaN(this.pos.y)) {
+      throw Error('invalid pos');
+    }
   };
 
   Circle.prototype.intersection = function(other) {
@@ -175,6 +178,10 @@ module.exports = Point = (function() {
     var d;
     d = Math.pow(other.x - this.x, 2) + Math.pow(other.y - this.y, 2);
     return Math.sqrt(d);
+  };
+
+  Point.prototype.isReal = function() {
+    return Boolean(!_.isNaN(this.x) && !_.isNaN(this.y));
   };
 
   Point.prototype.toString = function() {
@@ -273,7 +280,7 @@ module.exports = Seed = (function(_super) {
       x: 0,
       y: 0
     };
-    this.r = 80;
+    this.r = 50;
     this.i = 0;
     this.createCircles();
     this.drawCircles();
@@ -307,25 +314,17 @@ module.exports = Seed = (function(_super) {
         }, null, 1);
       };
     })(this), 6);
-
-    /*
-    @iterRadians (i, degrees, rads) =>
-      @pos = getPos(rads, 2)
-      @createCircle(class: 'level-2', null, 2)
-    , 6
-     */
-    this.drawGen2(1, 2);
-    this.drawGen2(2, 2);
-    this.drawGen2(2, 3);
-    return;
+    this.drawGenByIntersections(1, 2);
+    this.drawGenByIntersections(2, 2);
+    this.drawGenByIntersections(2, 3);
+    this.drawGenByIntersections(3, 4);
+    this.drawGenByIntersections(4, 5);
     if (this.model.get('mode') === 'seed') {
       this.pos = _(this.center).clone();
-      this.createCircle({
+      return this.createCircle({
         "class": 'outer',
-        r: this.r * 2
+        r: this.r * 8
       });
-    } else {
-      return this.drawGeneration(1, circle);
     }
   };
 
@@ -348,7 +347,6 @@ module.exports = Seed = (function(_super) {
         };
       };
     })(this);
-    "rect = circle.getBoundingClientRect()\n@pos =\n  x: rect.left + (rect.width / 2) - @r * 1.5\n  y: rect.top + (rect.height / 2) + @r * @levelScaleFactor";
     _draw = (function(_this) {
       return function(i, gen) {
         var delta, rads;
@@ -386,19 +384,22 @@ module.exports = Seed = (function(_super) {
     return _results;
   };
 
-  Seed.prototype.drawGen2 = function(childGenId, genId) {
+  Seed.prototype.drawGenByIntersections = function(childGenId, genId) {
     var c2, circle, gen, i, int, newCircle, _i, _ref, _results;
     console.log('Gen', genId);
     gen = this.circles.where({
       gen: childGenId
     });
+    gen = _(gen).sortBy(function(c) {
+      return Math.atan2(c.pos.x, c.pos.y);
+    });
     _results = [];
     for (i = _i = 0, _ref = gen.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
       circle = gen[i];
-      c2 = this.circles.get(gen[0].id + (gen.length + 1 + i) % gen.length);
+      c2 = gen[(i + 1) % gen.length];
       int = circle.intersection(c2);
       console.log(circle.id, c2.id, int);
-      if (int) {
+      if (int != null ? int[0].isReal() : void 0) {
         _results.push(newCircle = this.createCircle({
           "class": 'level-3'
         }, int[0], genId));
@@ -417,7 +418,7 @@ module.exports = Seed = (function(_super) {
     console.log('circle', this.i);
     _attrs = {
       r: this.r,
-      "class": 'circle',
+      "class": "circle level-" + gen,
       cx: pos.x,
       cy: pos.y,
       'data-id': this.i,
@@ -471,8 +472,8 @@ module.exports = Seed = (function(_super) {
         }
         _this.drawCircle(_this.circles.models[i]);
         i++;
-        wait = i < 12 ? 0 : 500;
-        return _.delay(_draw, wait);
+        wait = i < 12 ? 0 : 0;
+        return _draw();
       };
     })(this))();
   };

@@ -10,7 +10,7 @@ module.exports = class Seed extends Backbone.View
   render: ->
     @svg = @options.app.svg
     @center = x: 0, y: 0
-    @r = 80
+    @r = 50
     @i = 0
     @createCircles()
     @drawCircles()
@@ -32,42 +32,25 @@ module.exports = class Seed extends Backbone.View
       @pos = getPos(rads, 1)
       @createCircle(class: 'level-1', null, 1)
     , 6
-    ###
-    @iterRadians (i, degrees, rads) =>
-      @pos = getPos(rads, 2)
-      @createCircle(class: 'level-2', null, 2)
-    , 6
-    ###
-    @drawGen2 1, 2
-    @drawGen2 2, 2
-    @drawGen2 2, 3
 
-    #@iterRadians (i, degrees, rads) =>
-    #  @pos = getPos(rads, 1.73)
-    #  @createCircle(class: 'level-2')
-    #, 6, -30
-
-    return
+    @drawGenByIntersections 1, 2
+    @drawGenByIntersections 2, 2
+    @drawGenByIntersections 2, 3
+    @drawGenByIntersections 3, 4
+    @drawGenByIntersections 4, 5
 
     if @model.get('mode') is 'seed'
       @pos = _(@center).clone()
-      @createCircle(class: 'outer', r: @r * 2)
-      return
-    else
-      @drawGeneration(1, circle)
+      @createCircle(class: 'outer', r: @r * 8)
 
+  #not working
   drawGeneration: (gen, circle, dir=0) ->
     return if gen >= 2
 
     getPos = (rads, rscale=1) =>
       x: @pos.x + (Math.sin rads) * (@r * rscale)
       y: @pos.y - (Math.cos rads) * (@r * rscale)
-    """
-    rect = circle.getBoundingClientRect()
-    @pos =
-      x: rect.left + (rect.width / 2) - @r * 1.5
-      y: rect.top + (rect.height / 2) + @r * @levelScaleFactor
-    """
+
     _draw = (i, gen) =>
       rads = @getRads(i)
       @pos = getPos(rads, @levelScaleFactor * 2)
@@ -89,15 +72,16 @@ module.exports = class Seed extends Backbone.View
     for i in [0..circles.length-1]
       @drawGeneration(gen+1, circle, (i+dir)%6)
 
-  drawGen2: (childGenId, genId) ->
+  drawGenByIntersections: (childGenId, genId) ->
     console.log 'Gen', genId
     gen = @circles.where({gen: childGenId})
+    gen = _(gen).sortBy (c) -> Math.atan2(c.pos.x, c.pos.y)
     for i in [0..gen.length-1]
       circle = gen[i]
-      c2 = @circles.get(gen[0].id + (gen.length + 1 + i) % gen.length)
+      c2 = gen[(i+1) % gen.length]
       int = circle.intersection(c2)
       console.log circle.id, c2.id, int
-      if int
+      if int?[0].isReal()
         newCircle = @createCircle class: 'level-3', int[0], genId
       else
         console.log 'no int'
@@ -106,7 +90,7 @@ module.exports = class Seed extends Backbone.View
     console.log 'circle', @i
     _attrs =
       r: @r
-      class: 'circle'
+      class: "circle level-#{gen}"
       cx: pos.x
       cy: pos.y
       'data-id': @i
@@ -152,8 +136,8 @@ module.exports = class Seed extends Backbone.View
         return
       @drawCircle @circles.models[i]
       i++
-      wait = if i < 12 then 0 else 500
-      _.delay _draw, wait
+      wait = if i < 12 then 0 else 0
+      _draw()
     return
 
   drawMarker: (pos) ->

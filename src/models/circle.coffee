@@ -4,6 +4,8 @@ module.exports = class Circle extends Backbone.Model
 
   initialize: ->
     @pos = new Point @get('pos')
+    if _.isNaN(@pos.x) or _.isNaN(@pos.y)
+      throw Error 'invalid pos'
 
   intersection: (other) ->
     d = @pos.distance(other.pos)
