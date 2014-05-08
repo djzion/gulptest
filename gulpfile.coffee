@@ -95,7 +95,7 @@ gulp.task 'src', ->
 
 gulp.task 'watch', ->
   gulp.watch sources.sass, ['style']
-  gulp.watch sources.app, ['lint', 'src', 'html', 'templates']
+  gulp.watch sources.coffee, ['src', 'html', 'templates']
   gulp.watch sources.html, ['html']
 
 gulp.task 'clean', ->

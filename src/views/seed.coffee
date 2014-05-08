@@ -10,13 +10,10 @@ module.exports = class Seed extends Backbone.View
   render: ->
     @svg = @options.app.svg
     @center = x: 0, y: 0
-    @r = 200
+    @r = 80
     @i = 0
     @createCircles()
     @drawCircles()
-
-    pos = @circles.get(12).intersection @circles.get(13)
-    @drawMarker pos
     @
 
   createCircles: ->
@@ -33,18 +30,18 @@ module.exports = class Seed extends Backbone.View
     @level = 1
     @iterRadians (i, degrees, rads) =>
       @pos = getPos(rads, 1)
-      @createCircle(class: 'level-1')
+      @createCircle(class: 'level-1', null, 1)
     , 6
 
     @iterRadians (i, degrees, rads) =>
       @pos = getPos(rads, 2)
-      @createCircle(class: 'level-2')
+      @createCircle(class: 'level-2', null, 2)
     , 6
 
-    @iterRadians (i, degrees, rads) =>
-      @pos = getPos(rads, 1.73)
-      @createCircle(class: 'level-2')
-    , 6, -30
+    #@iterRadians (i, degrees, rads) =>
+    #  @pos = getPos(rads, 1.73)
+    #  @createCircle(class: 'level-2')
+    #, 6, -30
 
     return
 
@@ -88,13 +85,14 @@ module.exports = class Seed extends Backbone.View
     for i in [0..circles.length-1]
       @drawGeneration(gen+1, circle, (i+dir)%6)
 
-  createCircle: (attrs, pos=@pos) ->
+  createCircle: (attrs, pos=@pos, gen) ->
     _attrs =
       r: @r
       class: 'circle'
       cx: pos.x
       cy: pos.y
-      'data-id':@i
+      'data-id': @i
+      id: "circle-#{@i}"
     _(_attrs).extend attrs
 
     circle = new Circle
@@ -102,6 +100,7 @@ module.exports = class Seed extends Backbone.View
       pos: pos
       attrs: _attrs
       index: @i
+      gen: gen
     @circles.add circle
     @i++
 
@@ -109,10 +108,13 @@ module.exports = class Seed extends Backbone.View
 
   drawCircle: (circle) ->
     node = @svg.append("svg:circle").attr(circle.get 'attrs').datum(circle: circle)
+    circle.el = @svg.select("##{circle.get('attrs').id}").node()
+
     pointAttrs =
       r: 2
       cx: circle.get('pos').x
       cy: circle.get('pos').y
+      id: circle.id
     @svg.append("svg:circle").attr pointAttrs
 
     $text = @svg.append('text').attr
@@ -134,10 +136,11 @@ module.exports = class Seed extends Backbone.View
       i++
       wait = if i < 12 then 0 else 500
       _.delay _draw, wait
+    return
 
   drawMarker: (pos) ->
     pointAttrs =
-      r: 2
+      r: 5
       cx: pos.x
       cy: pos.y
     @svg.append("svg:circle").attr pointAttrs

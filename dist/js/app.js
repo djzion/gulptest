@@ -229,18 +229,15 @@ module.exports = Seed = (function(_super) {
   };
 
   Seed.prototype.render = function() {
-    var pos;
     this.svg = this.options.app.svg;
     this.center = {
       x: 0,
       y: 0
     };
-    this.r = 200;
+    this.r = 80;
     this.i = 0;
     this.createCircles();
     this.drawCircles();
-    pos = this.circles.get(12).intersection(this.circles.get(13));
-    this.drawMarker(pos);
     return this;
   };
 
@@ -268,7 +265,7 @@ module.exports = Seed = (function(_super) {
         _this.pos = getPos(rads, 1);
         return _this.createCircle({
           "class": 'level-1'
-        });
+        }, null, 1);
       };
     })(this), 6);
     this.iterRadians((function(_this) {
@@ -276,17 +273,9 @@ module.exports = Seed = (function(_super) {
         _this.pos = getPos(rads, 2);
         return _this.createCircle({
           "class": 'level-2'
-        });
+        }, null, 2);
       };
     })(this), 6);
-    this.iterRadians((function(_this) {
-      return function(i, degrees, rads) {
-        _this.pos = getPos(rads, 1.73);
-        return _this.createCircle({
-          "class": 'level-2'
-        });
-      };
-    })(this), 6, -30);
     return;
     if (this.model.get('mode') === 'seed') {
       this.pos = _(this.center).clone();
@@ -356,7 +345,7 @@ module.exports = Seed = (function(_super) {
     return _results;
   };
 
-  Seed.prototype.createCircle = function(attrs, pos) {
+  Seed.prototype.createCircle = function(attrs, pos, gen) {
     var circle, _attrs;
     if (pos == null) {
       pos = this.pos;
@@ -366,14 +355,16 @@ module.exports = Seed = (function(_super) {
       "class": 'circle',
       cx: pos.x,
       cy: pos.y,
-      'data-id': this.i
+      'data-id': this.i,
+      id: "circle-" + this.i
     };
     _(_attrs).extend(attrs);
     circle = new Circle({
       id: this.i,
       pos: pos,
       attrs: _attrs,
-      index: this.i
+      index: this.i,
+      gen: gen
     });
     this.circles.add(circle);
     this.i++;
@@ -385,10 +376,12 @@ module.exports = Seed = (function(_super) {
     node = this.svg.append("svg:circle").attr(circle.get('attrs')).datum({
       circle: circle
     });
+    circle.el = this.svg.select("#" + (circle.get('attrs').id)).node();
     pointAttrs = {
       r: 2,
       cx: circle.get('pos').x,
-      cy: circle.get('pos').y
+      cy: circle.get('pos').y,
+      id: circle.id
     };
     this.svg.append("svg:circle").attr(pointAttrs);
     $text = this.svg.append('text').attr({
@@ -405,7 +398,7 @@ module.exports = Seed = (function(_super) {
   Seed.prototype.drawCircles = function() {
     var i, _draw;
     i = 0;
-    return (_draw = (function(_this) {
+    (_draw = (function(_this) {
       return function() {
         var wait;
         if (i >= _this.circles.size()) {
@@ -422,7 +415,7 @@ module.exports = Seed = (function(_super) {
   Seed.prototype.drawMarker = function(pos) {
     var pointAttrs;
     pointAttrs = {
-      r: 2,
+      r: 5,
       cx: pos.x,
       cy: pos.y
     };
