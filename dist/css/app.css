@@ -19,21 +19,24 @@ div {
     fill: transparent;
     stroke: black;
     stroke-width: 1px;
+    opacity: 0.4;
     text-fill: black;
     text-font-size: 20px;
     text-text-anchor: middle; }
     #page circle.center, #page circle.outer {
       stroke: red; }
     #page circle.level-1 {
-      stroke: #333333; }
+      fill: #0000fe; }
     #page circle.level-2 {
-      stroke: #666666; }
+      fill: #006699; }
     #page circle.level-3 {
-      stroke: #999999; }
+      fill: #00afef; }
     #page circle.level-4 {
-      stroke: #cccccc; }
+      fill: #00d6b2; }
     #page circle.level-5 {
-      stroke: #006699; }
+      fill: #2ca2af; }
+    #page circle.level-6 {
+      fill: #05f4e2; }
   #page line.axis {
     stroke: black;
     stroke-width: 2px; }

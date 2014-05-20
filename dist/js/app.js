@@ -284,7 +284,7 @@ module.exports = Seed = (function(_super) {
       x: 0,
       y: 0
     };
-    this.r = 50;
+    this.r = 70;
     this.i = 0;
     this.createCircles();
     this.drawCircles();
@@ -323,6 +323,7 @@ module.exports = Seed = (function(_super) {
     this.drawGenByIntersections(2, 3);
     this.drawGenByIntersections(3, 4);
     this.drawGenByIntersections(4, 5);
+    this.drawGenByIntersections(5, 6);
     if (this.model.get('mode') === 'seed') {
       this.pos = _(this.center).clone();
       return this.createCircle({
@@ -405,7 +406,7 @@ module.exports = Seed = (function(_super) {
       console.log(circle.id, c2.id, int);
       if (int != null ? int[0].isReal() : void 0) {
         _results.push(newCircle = this.createCircle({
-          "class": 'level-3'
+          "class": "level-" + genId
         }, int[0], genId));
       } else {
         _results.push(console.log('no int'));
@@ -442,8 +443,9 @@ module.exports = Seed = (function(_super) {
   };
 
   Seed.prototype.drawCircle = function(circle) {
-    var $text, node, pointAttrs;
-    node = this.svg.append("svg:circle").attr(circle.get('attrs')).datum({
+    var $text, g, node, pointAttrs;
+    g = this.svg.append('svg:g');
+    node = g.append("svg:circle").attr(circle.get('attrs')).datum({
       circle: circle
     });
     circle.el = this.svg.select("#" + (circle.get('attrs').id)).node();
@@ -460,6 +462,7 @@ module.exports = Seed = (function(_super) {
     });
     $text.text(circle.get('index'));
     node.on('click', function(data) {
+      d3.select(this).attr("transform", "scale(0.80)");
       return console.log(data.circle.toJSON());
     });
     return node[0][0];

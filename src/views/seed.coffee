@@ -10,7 +10,7 @@ module.exports = class Seed extends Backbone.View
   render: ->
     @svg = @options.app.svg
     @center = x: 0, y: 0
-    @r = 50
+    @r = 70
     @i = 0
     @createCircles()
     @drawCircles()
@@ -38,6 +38,7 @@ module.exports = class Seed extends Backbone.View
     @drawGenByIntersections 2, 3
     @drawGenByIntersections 3, 4
     @drawGenByIntersections 4, 5
+    @drawGenByIntersections 5, 6
 
     if @model.get('mode') is 'seed'
       @pos = _(@center).clone()
@@ -82,7 +83,7 @@ module.exports = class Seed extends Backbone.View
       int = circle.intersection(c2)
       console.log circle.id, c2.id, int
       if int?[0].isReal()
-        newCircle = @createCircle class: 'level-3', int[0], genId
+        newCircle = @createCircle class: "level-#{genId}", int[0], genId
       else
         console.log 'no int'
 
@@ -109,7 +110,8 @@ module.exports = class Seed extends Backbone.View
     circle
 
   drawCircle: (circle) ->
-    node = @svg.append("svg:circle").attr(circle.get 'attrs').datum(circle: circle)
+    g = @svg.append('svg:g')
+    node = g.append("svg:circle").attr(circle.get 'attrs').datum(circle: circle)
     circle.el = @svg.select("##{circle.get('attrs').id}").node()
 
     pointAttrs =
@@ -125,6 +127,9 @@ module.exports = class Seed extends Backbone.View
     $text.text circle.get('index')
 
     node.on 'click', (data) ->
+
+      d3.select(@)
+        .attr("transform", "scale(0.80)")
       console.log data.circle.toJSON()
 
     node[0][0]
