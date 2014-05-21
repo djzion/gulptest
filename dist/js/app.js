@@ -188,6 +188,13 @@ module.exports = Point = (function() {
     return Boolean(!_.isNaN(this.x) && !_.isNaN(this.y));
   };
 
+  Point.prototype.equals = function(other, acc) {
+    if (acc == null) {
+      acc = 0.001;
+    }
+    return Math.abs(other.x - this.x) < acc && Math.abs(other.y - this.y) < acc;
+  };
+
   Point.prototype.toString = function() {
     return {
       x: this.x,
@@ -257,13 +264,15 @@ module.exports = Grid = (function(_super) {
 });
 
 require.register("views/seed", function(exports, require, module){
-  var Circle, Circles, Seed,
+  var Circle, Circles, Point, Seed,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 Circle = require('models/circle');
 
 Circles = require('models/circles');
+
+Point = require('models/point');
 
 module.exports = Seed = (function(_super) {
   __extends(Seed, _super);
@@ -322,8 +331,13 @@ module.exports = Seed = (function(_super) {
     this.drawGenByIntersections(2, 2);
     this.drawGenByIntersections(2, 3);
     this.drawGenByIntersections(3, 4);
+    this.drawGenByIntersections(4, 4);
     this.drawGenByIntersections(4, 5);
+    this.drawGenByIntersections(5, 5);
     this.drawGenByIntersections(5, 6);
+    this.drawGenByIntersections(6, 7);
+    this.drawGenByIntersections(7, 8);
+    this.drawGenByIntersections(8, 9);
     if (this.model.get('mode') === 'seed') {
       this.pos = _(this.center).clone();
       return this.createCircle({
@@ -390,7 +404,7 @@ module.exports = Seed = (function(_super) {
   };
 
   Seed.prototype.drawGenByIntersections = function(childGenId, genId) {
-    var c2, circle, gen, i, int, newCircle, _i, _ref, _results;
+    var c2, circle, conflict, distFromOrigin, gen, i, int, newCircle, pastGeneration, _i, _ref, _results;
     console.log('Gen', genId);
     gen = this.circles.where({
       gen: childGenId
@@ -398,6 +412,7 @@ module.exports = Seed = (function(_super) {
     gen = _(gen).sortBy(function(c) {
       return Math.atan2(c.pos.x, c.pos.y);
     });
+    distFromOrigin = (this.r * genId) + this.r / 10;
     _results = [];
     for (i = _i = 0, _ref = gen.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
       circle = gen[i];
@@ -405,11 +420,27 @@ module.exports = Seed = (function(_super) {
       int = circle.intersection(c2);
       console.log(circle.id, c2.id, int);
       if (int != null ? int[0].isReal() : void 0) {
-        _results.push(newCircle = this.createCircle({
-          "class": "level-" + genId
-        }, int[0], genId));
+        conflict = this.circles.find((function(_this) {
+          return function(c) {
+            return c.pos.equals(int[0]);
+          };
+        })(this));
+        pastGeneration = int[0].distance(new Point({
+          x: 0,
+          y: 0
+        })) > distFromOrigin;
+        if (conflict) {
+          _results.push(console.log('not drawing because of conflict:', conflict));
+        } else if (pastGeneration) {
+          debugger;
+          _results.push(console.log('too far!!!'));
+        } else {
+          _results.push(newCircle = this.createCircle({
+            "class": "level-" + genId
+          }, int[0], genId));
+        }
       } else {
-        _results.push(console.log('no int'));
+        _results.push(console.log('no int', circle, c2));
       }
     }
     return _results;
@@ -424,8 +455,8 @@ module.exports = Seed = (function(_super) {
     _attrs = {
       r: this.r,
       "class": "circle level-" + gen,
-      cx: pos.x,
-      cy: pos.y,
+      cx: this.r,
+      cy: this.r,
       'data-id': this.i,
       id: "circle-" + this.i
     };
@@ -443,27 +474,31 @@ module.exports = Seed = (function(_super) {
   };
 
   Seed.prototype.drawCircle = function(circle) {
-    var $text, g, node, pointAttrs;
-    g = this.svg.append('svg:g');
+    var $text, g, node, pointAttrs, svg;
+    svg = this.svg.append('svg:svg').attr({
+      x: circle.get('pos').x - this.r,
+      y: circle.get('pos').y - this.r
+    });
+    g = svg.append('svg:g');
     node = g.append("svg:circle").attr(circle.get('attrs')).datum({
       circle: circle
     });
     circle.el = this.svg.select("#" + (circle.get('attrs').id)).node();
     pointAttrs = {
       r: 2,
-      cx: circle.get('pos').x,
-      cy: circle.get('pos').y,
+      cx: 0,
+      cy: 0,
       id: circle.id
     };
-    this.svg.append("svg:circle").attr(pointAttrs);
-    $text = this.svg.append('text').attr({
-      x: circle.get('pos').x,
-      y: circle.get('pos').y
+    g.append("svg:circle").attr(pointAttrs);
+    $text = g.append('text').attr({
+      x: this.r,
+      y: this.r
     });
     $text.text(circle.get('index'));
-    node.on('click', function(data) {
+    g.on('click', function(data) {
       d3.select(this).attr("transform", "scale(0.80)");
-      return console.log(data.circle.toJSON());
+      return console.log('click:', d3.select(this).select('circle').data()[0].circle.toJSON());
     });
     return node[0][0];
   };

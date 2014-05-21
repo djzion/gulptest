@@ -1,5 +1,6 @@
 Circle = require 'models/circle'
 Circles = require 'models/circles'
+Point = require 'models/point'
 
 module.exports = class Seed extends Backbone.View
 
@@ -37,8 +38,19 @@ module.exports = class Seed extends Backbone.View
     @drawGenByIntersections 2, 2
     @drawGenByIntersections 2, 3
     @drawGenByIntersections 3, 4
+    @drawGenByIntersections 4, 4
+    #@drawGenByIntersections 4, 4
     @drawGenByIntersections 4, 5
+    @drawGenByIntersections 5, 5
     @drawGenByIntersections 5, 6
+    #drawGenByIntersections 6, 6
+    @drawGenByIntersections 6, 7
+    @drawGenByIntersections 7, 8
+    @drawGenByIntersections 8, 9
+    #@drawGenByIntersections 9, 10
+    #@drawGenByIntersections 10, 11
+    #@drawGenByIntersections 11, 12
+    #@drawGenByIntersections 12, 13
 
     if @model.get('mode') is 'seed'
       @pos = _(@center).clone()
@@ -77,23 +89,33 @@ module.exports = class Seed extends Backbone.View
     console.log 'Gen', genId
     gen = @circles.where({gen: childGenId})
     gen = _(gen).sortBy (c) -> Math.atan2(c.pos.x, c.pos.y)
+    distFromOrigin = (@r * genId) + @r/10
     for i in [0..gen.length-1]
       circle = gen[i]
       c2 = gen[(i+1) % gen.length]
       int = circle.intersection(c2)
       console.log circle.id, c2.id, int
       if int?[0].isReal()
-        newCircle = @createCircle class: "level-#{genId}", int[0], genId
+        conflict = @circles.find (c) => c.pos.equals(int[0])
+        pastGeneration = int[0].distance(new Point(x: 0, y: 0)) > distFromOrigin
+        if conflict
+          console.log 'not drawing because of conflict:', conflict
+        else if pastGeneration
+          debugger
+          console.log 'too far!!!'
+        else
+          newCircle = @createCircle class: "level-#{genId}", int[0], genId
+
       else
-        console.log 'no int'
+        console.log 'no int', circle, c2
 
   createCircle: (attrs, pos=@pos, gen) ->
     console.log 'circle', @i
     _attrs =
       r: @r
       class: "circle level-#{gen}"
-      cx: pos.x
-      cy: pos.y
+      cx: @r
+      cy: @r
       'data-id': @i
       id: "circle-#{@i}"
     _(_attrs).extend attrs
@@ -110,27 +132,26 @@ module.exports = class Seed extends Backbone.View
     circle
 
   drawCircle: (circle) ->
-    g = @svg.append('svg:g')
+    svg = @svg.append('svg:svg').attr
+      x: circle.get('pos').x - @r
+      y: circle.get('pos').y - @r
+    g = svg.append('svg:g')
     node = g.append("svg:circle").attr(circle.get 'attrs').datum(circle: circle)
     circle.el = @svg.select("##{circle.get('attrs').id}").node()
 
     pointAttrs =
       r: 2
-      cx: circle.get('pos').x
-      cy: circle.get('pos').y
+      cx: 0
+      cy: 0
       id: circle.id
-    @svg.append("svg:circle").attr pointAttrs
+    g.append("svg:circle").attr pointAttrs
 
-    $text = @svg.append('text').attr
-      x: circle.get('pos').x
-      y: circle.get('pos').y
+    $text = g.append('text').attr x: @r, y: @r
     $text.text circle.get('index')
 
-    node.on 'click', (data) ->
-
-      d3.select(@)
-        .attr("transform", "scale(0.80)")
-      console.log data.circle.toJSON()
+    g.on 'click', (data) ->
+      d3.select(@).attr("transform", "scale(0.80)")
+      console.log 'click:', d3.select(@).select('circle').data()[0].circle.toJSON()
 
     node[0][0]
 

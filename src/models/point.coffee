@@ -9,5 +9,8 @@ module.exports = class Point
   isReal: ->
     Boolean(not _.isNaN(@x) and not _.isNaN(@y))
 
+  equals: (other, acc=0.001) ->
+    Math.abs(other.x - @x) < acc and Math.abs(other.y - @y) < acc
+
   toString: ->
     {@x, @y}
