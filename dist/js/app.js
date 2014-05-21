@@ -336,9 +336,7 @@ module.exports = Seed = (function(_super) {
     this.drawGenByIntersections(3, 4);
     this.drawGenByIntersections(4, 4);
     this.drawGenByIntersections(4, 5);
-    this.drawGenByIntersections(4, 5);
-    this.drawGenByIntersections(5, 5);
-    for (i = _i = 5; _i < 11; i = ++_i) {
+    for (i = _i = 5; _i < 6; i = ++_i) {
       this.drawGenByIntersections(i, i + 1);
     }
     if (this.model.get('mode') === 'seed') {

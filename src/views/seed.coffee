@@ -36,16 +36,17 @@ module.exports = class Seed extends Backbone.View
 
     @drawGenByIntersections 1, 2
     @drawGenByIntersections 2, 2
+
     @drawGenByIntersections 2, 3
+
     @drawGenByIntersections 3, 4
+
     @drawGenByIntersections 4, 4
-    @drawGenByIntersections 4, 5
 
 
     @drawGenByIntersections 4, 5
-    @drawGenByIntersections 5, 5
 
-    for i in [5...11]
+    for i in [5...6]
       @drawGenByIntersections i, i+1
 
     if @model.get('mode') is 'seed'
