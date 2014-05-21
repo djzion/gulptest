@@ -91,12 +91,15 @@ module.exports = Circle = (function(_super) {
     return this.pos.distance(other.pos);
   };
 
-  Circle.prototype.intersection = function(other) {
+  Circle.prototype.intersection = function(other, acc) {
     var a, d, h, int, p0, p1, p2, r0, r1, rx, ry;
+    if (acc == null) {
+      acc = 0.001;
+    }
     d = this.distance(other);
-    r0 = this.get('attrs').r;
+    r0 = this.get('attrs').r + acc;
     p0 = this.get('pos');
-    r1 = other.get('attrs').r;
+    r1 = other.get('attrs').r + acc;
     p1 = other.get('pos');
     if (d > r0 + r1) {
       console.log('does not intersect');
@@ -134,7 +137,6 @@ module.exports = Circle = (function(_super) {
       x: 0,
       y: 0
     }))) {
-      console.log('reversed');
       int = _(int).reverse();
     }
     return int;
@@ -266,7 +268,8 @@ module.exports = Grid = (function(_super) {
 require.register("views/seed", function(exports, require, module){
   var Circle, Circles, Point, Seed,
   __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  __slice = [].slice;
 
 Circle = require('models/circle');
 
@@ -293,7 +296,7 @@ module.exports = Seed = (function(_super) {
       x: 0,
       y: 0
     };
-    this.r = 70;
+    this.r = 60;
     this.i = 0;
     this.createCircles();
     this.drawCircles();
@@ -301,7 +304,7 @@ module.exports = Seed = (function(_super) {
   };
 
   Seed.prototype.createCircles = function() {
-    var circle, getPos;
+    var circle, getPos, i, _i;
     this.pos = _(this.center).clone();
     circle = this.createCircle({
       "class": 'center'
@@ -333,11 +336,11 @@ module.exports = Seed = (function(_super) {
     this.drawGenByIntersections(3, 4);
     this.drawGenByIntersections(4, 4);
     this.drawGenByIntersections(4, 5);
+    this.drawGenByIntersections(4, 5);
     this.drawGenByIntersections(5, 5);
-    this.drawGenByIntersections(5, 6);
-    this.drawGenByIntersections(6, 7);
-    this.drawGenByIntersections(7, 8);
-    this.drawGenByIntersections(8, 9);
+    for (i = _i = 5; _i < 11; i = ++_i) {
+      this.drawGenByIntersections(i, i + 1);
+    }
     if (this.model.get('mode') === 'seed') {
       this.pos = _(this.center).clone();
       return this.createCircle({
@@ -432,7 +435,6 @@ module.exports = Seed = (function(_super) {
         if (conflict) {
           _results.push(console.log('not drawing because of conflict:', conflict));
         } else if (pastGeneration) {
-          debugger;
           _results.push(console.log('too far!!!'));
         } else {
           _results.push(newCircle = this.createCircle({
@@ -551,6 +553,12 @@ module.exports = Seed = (function(_super) {
     }
     degrees = (360 * (i / count)) % 360;
     return rads = degrees * Math.PI / 180;
+  };
+
+  Seed.prototype.log = function() {
+    var msg;
+    msg = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    return console.log.apply(console, msg);
   };
 
   return Seed;

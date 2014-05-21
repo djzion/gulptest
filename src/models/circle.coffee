@@ -10,11 +10,11 @@ module.exports = class Circle extends Backbone.Model
   distance: (other) ->
     @pos.distance(other.pos)
 
-  intersection: (other) ->
+  intersection: (other, acc=0.001) ->
     d = @distance(other)
-    r0 = @get('attrs').r
+    r0 = @get('attrs').r + acc
     p0 = @get('pos')
-    r1 = other.get('attrs').r
+    r1 = other.get('attrs').r + acc
     p1 = other.get('pos')
 
     if d > r0 + r1
@@ -46,6 +46,5 @@ module.exports = class Circle extends Backbone.Model
     })]
 
     if int[1].distance(new Point(x: 0, y: 0)) >= int[0].distance(new Point(x: 0, y: 0))
-      console.log 'reversed'
       int = _(int).reverse()
     int

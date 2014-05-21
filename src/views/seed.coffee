@@ -11,7 +11,7 @@ module.exports = class Seed extends Backbone.View
   render: ->
     @svg = @options.app.svg
     @center = x: 0, y: 0
-    @r = 70
+    @r = 60
     @i = 0
     @createCircles()
     @drawCircles()
@@ -39,18 +39,14 @@ module.exports = class Seed extends Backbone.View
     @drawGenByIntersections 2, 3
     @drawGenByIntersections 3, 4
     @drawGenByIntersections 4, 4
-    #@drawGenByIntersections 4, 4
+    @drawGenByIntersections 4, 5
+
+
     @drawGenByIntersections 4, 5
     @drawGenByIntersections 5, 5
-    @drawGenByIntersections 5, 6
-    #drawGenByIntersections 6, 6
-    @drawGenByIntersections 6, 7
-    @drawGenByIntersections 7, 8
-    @drawGenByIntersections 8, 9
-    #@drawGenByIntersections 9, 10
-    #@drawGenByIntersections 10, 11
-    #@drawGenByIntersections 11, 12
-    #@drawGenByIntersections 12, 13
+
+    for i in [5...11]
+      @drawGenByIntersections i, i+1
 
     if @model.get('mode') is 'seed'
       @pos = _(@center).clone()
@@ -101,7 +97,6 @@ module.exports = class Seed extends Backbone.View
         if conflict
           console.log 'not drawing because of conflict:', conflict
         else if pastGeneration
-          debugger
           console.log 'too far!!!'
         else
           newCircle = @createCircle class: "level-#{genId}", int[0], genId
@@ -182,3 +177,6 @@ module.exports = class Seed extends Backbone.View
   getRads: (i, count=6) ->
       degrees = ((360 * (i/count))) % 360
       rads = degrees * Math.PI/180
+
+  log: (msg...) ->
+    console.log msg...
